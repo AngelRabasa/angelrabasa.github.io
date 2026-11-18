@@ -40,7 +40,8 @@ jobs:
         run: |
           git config user.name "4n-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data.js auto/state.json
+          git add data.js
+          [ -f auto/state.json ] && git add auto/state.json || true
           if git diff --cached --quiet; then echo "Nada que publicar"; else
             git commit -m "Datos automaticos (${{ steps.m.outputs.mode }}) $(date -u +%F)"
             git push
