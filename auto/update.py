@@ -38,6 +38,12 @@ COMPANIES = [
     ("NVS",  "Novartis",          "Healthcare",       "Switzerland"),
     ("TSM",  "TSMC",              "Technology",       "Taiwan"),
     ("INFY", "Infosys",           "Technology",       "India"),
+    ("AAPL", "Apple",             "Technology",       "United States"),
+    ("GOOGL","Alphabet",          "Technology",       "United States"),
+    ("AMZN", "Amazon",            "E-commerce",       "United States"),
+    ("COST", "Costco",            "Retail",           "United States"),
+    ("PG",   "Procter & Gamble",  "Consumer staples", "United States"),
+    ("AZN",  "AstraZeneca",       "Healthcare",       "United Kingdom"),
 ]
 BUDGET = 24   # peticiones por ejecución (límite gratuito: 25 al día). EE. UU. cuesta 4; el resto 5 (tipo de cambio)
 GROWTH, DISCOUNT, TERMINAL = 0.05, 0.09, 0.02   # supuestos del valor intrínseco
@@ -255,9 +261,25 @@ def filings():
         state = {}
     meta = {c[0]: c for c in COMPANIES}
     by = {c["symbol"]: c for c in data["companies"]}
-    order = sorted(by, key=lambda s: state.get(s, ""))     # primero las comprobadas hace más tiempo
     used = 0
     today = datetime.date.today().isoformat()
+    for sym, name, sector, region in COMPANIES:          # empresas nuevas de la lista: alta completa
+        if sym in by:
+            continue
+        cost = 5 if region != "United States" and sym not in ("AZN",) else 4
+        if used + cost > BUDGET:
+            print("PENDIENTE alta", sym, "(sin presupuesto hoy)"); continue
+        try:
+            inc = get("INCOME_STATEMENT", sym, key)
+            fx = get_fx(inc["annualReports"][0].get("reportedCurrency", "USD"), key)
+            r = compute(sym, name, sector, inc, get("BALANCE_SHEET", sym, key),
+                        get("CASH_FLOW", sym, key), get("GLOBAL_QUOTE", sym, key), fx, 1, region)
+            used += cost
+            data["companies"].append(r); by[sym] = r; state[sym] = today
+            print("ALTA", sym)
+        except Exception as e:
+            used += cost; print("FALLO alta", sym, str(e)[:100])
+    order = sorted(by, key=lambda s: state.get(s, ""))     # primero las comprobadas hace más tiempo
     for sym in order:
         if sym not in meta:
             continue
