@@ -592,9 +592,6 @@ details.q p{padding-bottom:18px;color:var(--ink-2);font-size:16px;max-width:70ch
 
 
 </style>
-<script>document.documentElement.setAttribute("data-theme","light");try{localStorage.setItem("arc-theme","light")}catch(e){}</script>
-<link rel="preload" href="fonts/newsreader-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="public.css">
 </head>
 <body>
 <a class="skip" href="#top">Skip to content</a>
@@ -968,7 +965,7 @@ function bars(c){var H=c.history,mx=Math.max.apply(null,H.map(function(h){return
  var scale=mx>=1e9?[1e9,'bn']:[1e6,'m'];
  H.forEach(function(h,i){var hh=h.revenue?(ht-30)*h.revenue/mx:0,x=i*bw+bw*.18,w=bw*.64,f=h.fcf_margin!=null&&h.revenue?(ht-30)*Math.max(0,h.fcf)/mx:0;
   s+='<rect class="b" x="'+x+'" y="'+(ht-hh)+'" width="'+w+'" height="'+hh+'" rx="6"/><rect class="b f" x="'+x+'" y="'+(ht-f)+'" width="'+w+'" height="'+f+'" rx="6"/><text class="vv" x="'+(x+w/2)+'" y="'+(ht-hh-8)+'" text-anchor="middle">'+(h.revenue/scale[0]).toFixed(0)+scale[1]+'</text><text x="'+(x+w/2)+'" y="'+(ht+18)+'" text-anchor="middle">'+h.year+'</text>'});
- return'<h3>Sales and free cash flow, '+H.length+' years</h3><p>'+c.currency+'. Grey is sales, green is the part that became free cash flow.</p><svg viewBox="0 -4 640 196" role="img" aria-label="Bar chart of sales and free cash flow per year">'+s+'</svg><div class="legend"><span><i style="background:var(--ink-2)"></i>Sales</span><span><i style="background:var(--up)"></i>Free cash flow</span></div>'}
+ return'<h3>Sales and free cash flow, '+H.length+' years</h3><p>'+c.currency+'. Brass is sales, green is the part that became free cash flow.</p><svg viewBox="0 -4 640 196" role="img" aria-label="Bar chart of sales and free cash flow per year">'+s+'</svg><div class="legend"><span><i style="background:var(--accent)"></i>Sales</span><span><i style="background:var(--up)"></i>Free cash flow</span></div>'}
 function render(){var c=C[cur],h=L.last(c),v=L.verdict(c);try{history.replaceState(null,'','#'+c.symbol)}catch(e){}
  document.getElementById('who').innerHTML='<h2>'+c.name+'</h2><p class="meta">'+c.symbol+' \u00b7 '+c.sector+' \u00b7 '+(c.region||'')+' \u00b7 FY'+h.year+' \u00b7 '+c.currency+(c.reported_currency&&c.reported_currency!=='USD'?' (reports in '+c.reported_currency+')':'')+'</p><div class="verdict '+v.cls+'"><b>'+v.t+'</b><p>'+v.p+'</p></div>'+(L.flags(c).length?'<ul class="flags">'+L.flags(c).map(function(x){return'<li class="'+x.c+'">'+x.t+'</li>'}).join('')+'</ul>':'')+
  '<div class="keys"><div><small>Price ('+c.price_date+')</small><strong>'+L.money(c.price)+'</strong></div><div><small>My value estimate</small><strong>'+L.money(c.value_per_share)+'</strong></div><div><small>Market cap</small><strong>'+L.cap(c.market_cap_b)+'</strong></div><div><small>FCF yield</small><strong>'+L.pct(c.fcf_yield)+'%</strong></div></div>'+
