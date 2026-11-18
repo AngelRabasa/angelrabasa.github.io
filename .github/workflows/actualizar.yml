@@ -1,0 +1,47 @@
+name: Actualizar 4 Numbers
+
+on:
+  schedule:
+    - cron: "30 22 * * 1-5"   # lunes a viernes, 22:30 UTC (despues del cierre de Wall Street): cotizaciones
+    - cron: "0 9 * * 6"       # sabados, 09:00 UTC: busca cuentas anuales nuevas
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "prices, filings o full"
+        default: prices
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualizar
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Elegir modo
+        id: m
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then MODE="${{ inputs.mode }}";
+          elif [ "${{ github.event.schedule }}" = "0 9 * * 6" ]; then MODE=filings;
+          else MODE=prices; fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+      - name: Ejecutar
+        env:
+          ALPHAVANTAGE_KEY: ${{ secrets.ALPHAVANTAGE_KEY }}
+        run: python auto/update.py ${{ steps.m.outputs.mode }}
+      - name: Guardar cambios
+        run: |
+          git config user.name "4n-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data.js auto/state.json
+          if git diff --cached --quiet; then echo "Nada que publicar"; else
+            git commit -m "Datos automaticos (${{ steps.m.outputs.mode }}) $(date -u +%F)"
+            git push
+          fi
